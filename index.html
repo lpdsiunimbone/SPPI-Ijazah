@@ -1,93 +1,1189 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cek Progres Ijazah - Universitas Muhammadiyah Bone</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body class="bg-gray-100 font-sans">
-  <header class="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-6 px-4 shadow-lg">
-    <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="text-center md:text-left flex-1">
-        <h1 class="text-3xl font-bold">Sistem Pengecekan Progres Ijazah Mahasiswa</h1>
-        <h2 class="text-xl mt-2">Universitas Muhammadiyah Bone</h2>
-      </div>
-      <div class="flex-shrink-0">
-        <img src="https://drive.google.com/uc?export=view&id=1zKh6zQ5m8h2_9tvl_xm3rdiysk0GkC21" alt="Logo Universitas Muhammadiyah Bone" class="h-20 md:h-24">
-      </div>
-    </div>
-  </header>
-
-  <main class="container mx-auto p-4 mt-6">
-    <div class="bg-white rounded shadow p-6">
-      <label for="nimInput" class="block text-gray-700 text-sm font-semibold mb-2">Masukkan NIM Mahasiswa:</label>
-      <input type="text" id="nimInput" placeholder="Contoh: 202301001" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring focus:border-blue-500" />
-      <button onclick="cekData()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Cek Progres</button>
-    </div>
-
-    <div id="loading" class="text-center mt-6 hidden">
-      <span class="text-blue-600 font-semibold">Mengambil data...</span>
-    </div>
-
-    <div id="resultCard" class="bg-white rounded shadow p-6 mt-6 hidden">
-      <h3 class="text-lg font-bold mb-2">Hasil Pengecekan:</h3>
-      <p><strong>Nama:</strong> <span id="resultNama"></span></p>
-      <p><strong>Program Studi:</strong> <span id="resultProdi"></span></p>
-      <p><strong>Jenjang:</strong> <span id="resultJenjang"></span></p>
-      <p><strong>Tahun Masuk:</strong> <span id="resultTahunMasuk"></span></p>
-      <p><strong>Tanggal Yudisium:</strong> <span id="resultTanggalYudisium"></span></p>
-      <p><strong>Status:</strong> <span id="resultStatus"></span></p>
-      <p><strong>Keterangan:</strong> <span id="resultKeterangan"></span></p>
-    </div>
-
-    <div id="noDataMessage" class="mt-6 text-red-600 font-semibold hidden">Data tidak ditemukan.</div>
-  </main>
-
-  <script>
-    const loadingElement = document.getElementById('loading');
-    const resultCard = document.getElementById('resultCard');
-    const noDataMessage = document.getElementById('noDataMessage');
-
-    function displayStudentData(student) {
-      document.getElementById('resultNama').innerText = student.nama;
-      document.getElementById('resultProdi').innerText = student.prodi;
-      document.getElementById('resultJenjang').innerText = student.jenjang;
-      document.getElementById('resultTahunMasuk').innerText = student.tahun_masuk;
-      document.getElementById('resultTanggalYudisium').innerText = student.tanggal_yudisium;
-      document.getElementById('resultStatus').innerText = student.status;
-      document.getElementById('resultKeterangan').innerText = student.keterangan;
-
-      resultCard.classList.remove('hidden');
-    }
-
-    async function cekData() {
-      const nim = document.getElementById("nimInput").value.trim();
-      if (!nim) return Swal.fire("NIM kosong", "Masukkan NIM terlebih dahulu.", "warning");
-
-      loadingElement.classList.remove('hidden');
-      resultCard.classList.add('hidden');
-      noDataMessage.classList.add('hidden');
-
-      try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbz8BQMrC5J4F0ni-y8dptdj9ofoTVbJKoo2Or2x6QrsTxodKLlJFVkkbSiEkGXkkTlH/exec");
-        const data = await response.json();
-
-        const student = data.find(d => String(d.nim).toUpperCase().trim() === nim.toUpperCase());
-
-        loadingElement.classList.add('hidden');
-
-        if (student) {
-          displayStudentData(student);
-        } else {
-          noDataMessage.classList.remove('hidden');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengecekan Progres Ijazah Mahasiswa - Universitas Muhammadiyah Bone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
         }
-      } catch (error) {
-        loadingElement.classList.add('hidden');
-        Swal.fire("Gagal mengambil data", "Periksa koneksi internet atau hubungi admin.", "error");
-      }
-    }
-  </script>
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @-webkit-keyframes spinner {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-800 to-blue-600 text-white py-6 px-4 shadow-lg">
+            <div class="container mx-auto">
+                <h1 class="text-3xl font-bold text-center">Sistem Pengecekan Progres Ijazah Mahasiswa</h1>
+                <h2 class="text-xl text-center mt-2">Universitas Muhammadiyah Bone</h2>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="mb-6">
+                    <label for="nim" class="block text-gray-700 text-sm font-medium mb-2">Nomor Induk Mahasiswa (NIM)</label>
+                    <div class="flex">
+                        <input type="text" id="nim" class="flex-grow px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="Masukkan NIM Anda (contoh: 317056)">
+                        <button id="searchBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-r-lg transition duration-300">
+                            Cari
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loading" class="hidden flex justify-center my-8">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+                </div>
+
+                <div id="noDataMessage" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                Data mahasiswa dengan NIM tersebut tidak ditemukan. Mohon periksa kembali NIM Anda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="resultCard" class="hidden bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-blue-50 px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-blue-800" id="studentName">Nama Mahasiswa</h3>
+                        <p class="text-sm text-gray-600" id="studentNIM">NIM: -</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Program Studi</p>
+                                <p class="font-medium" id="prodi">-</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Jenjang</p>
+                                <p class="font-medium" id="jenjang">-</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tahun Masuk</p>
+                                <p class="font-medium" id="tahunMasuk">-</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Tanggal Yudisium</p>
+                                <p class="font-medium" id="tanggalYudisium">-</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
+                            <div class="md:w-1/2">
+                                <p class="text-sm text-gray-500">Status Ijazah</p>
+                                <div class="mt-2">
+                                    <span id="statusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium">
+                                        <span id="statusText">-</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="md:w-1/2">
+                                <p class="text-sm text-gray-500">Keterangan</p>
+                                <p class="mt-1 text-gray-700" id="keterangan">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6 px-4">
+            <div class="container mx-auto text-center">
+                <p>Copyright &copy; 2025 Sistem Pengecekan Progres Ijazah - Lembaga Pusat Data dan Sistem Informasi</p>
+                <p class="text-sm mt-2 text-gray-300">Untuk informasi lebih lanjut hubungi Biro Administrasi Akademik dan Kemahasiswaan (BAAK)</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nimInput = document.getElementById('nim');
+            const searchBtn = document.getElementById('searchBtn');
+            const loadingElement = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            const noDataMessage = document.getElementById('noDataMessage');
+
+            // Student data embedded directly in the application
+            const studentData = [
+                // Original data
+                {
+                    "Nama": "HAERANI",
+                    "NIM": "317056",
+                    "Tahun Masuk": "2017",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "27 Agustus 2021",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Magfirah",
+                    "NIM": "320004",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Rasma",
+                    "NIM": "320005",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Haerul Abdilla",
+                    "NIM": "319003",
+                    "Tahun Masuk": "2019",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "19 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "IPK KURANG"
+                },
+                {
+                    "Nama": "Cindi",
+                    "NIM": "320014",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "19 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Al Imran Saputra",
+                    "NIM": "320025",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "19 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Restiani Nur",
+                    "NIM": "2169010391",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "Pendidikan Bahasa Indonesia",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "19 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Arswin Aulia Mamits",
+                    "NIM": "417015",
+                    "Tahun Masuk": "2017",
+                    "Program Studi": "Pendidikan Bahasa Inggris",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "9 Agustus 2022",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Ahmad Kausar Ramadhan",
+                    "NIM": "420012",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Inggris",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Asgina Nurul Faizah",
+                    "NIM": "420014",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Inggris",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Siska Rinanti",
+                    "NIM": "420003",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Bahasa Inggris",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "7 Agustus 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "MARWAH",
+                    "NIM": "517019",
+                    "Tahun Masuk": "2017",
+                    "Program Studi": "Pendidikan Matematika",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "30 Agustus 2021",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Ervin Subakti",
+                    "NIM": "520021",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Matematika",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Saharuddin",
+                    "NIM": "520022",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Matematika",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Hasni",
+                    "NIM": "616001",
+                    "Tahun Masuk": "2016",
+                    "Program Studi": "Pendidikan Biologi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "06 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "MASA STUDI > 7 TAHUN"
+                },
+                {
+                    "Nama": "Uswatul Hasanah",
+                    "NIM": "23690106036",
+                    "Tahun Masuk": "2023",
+                    "Program Studi": "Pendidikan Biologi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "ARMAWATI",
+                    "NIM": "2269010744",
+                    "Tahun Masuk": "2022",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "DARNAWATI",
+                    "NIM": "2269010743",
+                    "Tahun Masuk": "2023",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "KARTINI DM",
+                    "NIM": "2269010739",
+                    "Tahun Masuk": "2022",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Edy Surya",
+                    "NIM": "720002",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "SATRIANI RAHAYU",
+                    "NIM": "2269010740",
+                    "Tahun Masuk": "2022",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "ASWAN",
+                    "NIM": "716020",
+                    "Tahun Masuk": "2016",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "22 Agustus 2022",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "IPK KURANG"
+                },
+                {
+                    "Nama": "YUDHI HERNAWAN",
+                    "NIM": "720013",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "IPK KURANG"
+                },
+                {
+                    "Nama": "YUNUS JUFRI",
+                    "NIM": "2269010721",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Kewarganegaraan",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "25 Februari 2025",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "DEDI RISALDI",
+                    "NIM": "817062",
+                    "Tahun Masuk": "2017",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "05 Agustus 2021",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "MUSTAKIM",
+                    "NIM": "818028",
+                    "Tahun Masuk": "2018",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "9 Agustus 2022",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "MILDASARI",
+                    "NIM": "818027",
+                    "Tahun Masuk": "2018",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "9 Agustus 2022",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "MUHAMMAD HERWIN",
+                    "NIM": "818048",
+                    "Tahun Masuk": "2018",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 Agustus 2022",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Bobi Febrianto",
+                    "NIM": "818015",
+                    "Tahun Masuk": "2018",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "29 Agustus 2023",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "DATA TIDAK DITEMUKAN"
+                },
+                {
+                    "Nama": "Yuliana Yusuf",
+                    "NIM": "819028",
+                    "Tahun Masuk": "2019",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "04 Agustus 2023",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Masriadi",
+                    "NIM": "819036",
+                    "Tahun Masuk": "2019",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "16 Agustus 2023",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Andi Tenriawaru",
+                    "NIM": "21690108107",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "29 Agustus 2023",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "IPK KURANG"
+                },
+                {
+                    "Nama": "Rini Andini",
+                    "NIM": "820001",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Sulfiana",
+                    "NIM": "820007",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Nurul Fatimah Assahra",
+                    "NIM": "820012",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "A. Nur Intan Faisal",
+                    "NIM": "820013",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+
+                // Previous additional data
+                {
+                    "Nama": "Adinda Pratiwi",
+                    "NIM": "820018",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Nur Yulia Rahman",
+                    "NIM": "820019",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Aswalisah",
+                    "NIM": "820027",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Irsandy Isnar",
+                    "NIM": "820055",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Nurhidayah Kamal",
+                    "NIM": "820030",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Arwan",
+                    "NIM": "820037",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Syahrul Muaksan",
+                    "NIM": "820038",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "18 April 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Ika Dwi Jaksana",
+                    "NIM": "820010",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Mirnawati",
+                    "NIM": "820014",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Indi Sagita",
+                    "NIM": "820015",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Andi Nur Asrah Bahar",
+                    "NIM": "820023",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Nurul Izmi",
+                    "NIM": "820049",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Resny Mulyani",
+                    "NIM": "820051",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "A. Tenriawaru Anwar",
+                    "NIM": "21690108107",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "IPK KURANG"
+                },
+                {
+                    "Nama": "Wawan",
+                    "NIM": "820032",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Ika",
+                    "NIM": "820036",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Muhammad Tedy Gunawan",
+                    "NIM": "820040",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Wilda Vina Sari",
+                    "NIM": "820050",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Andi Sose",
+                    "NIM": "820052",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Riskiana",
+                    "NIM": "820011",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Jusma",
+                    "NIM": "820017",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Lini Puspita",
+                    "NIM": "820031",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Susi",
+                    "NIM": "820033",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Asriani",
+                    "NIM": "820042",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Alda Sari",
+                    "NIM": "820044",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "6 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "M. Akbar",
+                    "NIM": "820021",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "8 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Nurfadillah",
+                    "NIM": "820029",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "8 Juli 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Kartini",
+                    "NIM": "820034",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "8 Juli 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Maria Ulpa",
+                    "NIM": "820003",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Reski Ana",
+                    "NIM": "820004",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Azisah",
+                    "NIM": "820009",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Andi Tenri Pada",
+                    "NIM": "820022",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Sarfina Seprianti",
+                    "NIM": "820024",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Tetty Arsyta",
+                    "NIM": "820002",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Asriadi",
+                    "NIM": "820005",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Juhardi",
+                    "NIM": "820006",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Syinta Rahman",
+                    "NIM": "820016",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Andi Nurul Hasanah.Ap",
+                    "NIM": "820028",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Muh. Izhur S",
+                    "NIM": "820053",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+
+                // New additional data
+                {
+                    "Nama": "Nurfadillah",
+                    "NIM": "2169010896",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Hasfidah",
+                    "NIM": "816042",
+                    "Tahun Masuk": "2016",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "MASA STUDI > 7 TAHUN"
+                },
+                {
+                    "Nama": "Syamsu Rijal",
+                    "NIM": "817032",
+                    "Tahun Masuk": "2017",
+                    "Program Studi": "Pendidikan Ekonomi",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "19 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "MASA STUDI > 7 TAHUN"
+                },
+                {
+                    "Nama": "Muhammad Basri",
+                    "NIM": "2169010979",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Maret 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Abdul Rahman",
+                    "NIM": "918025",
+                    "Tahun Masuk": "2018",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "14 Maret 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Nopri Jumadil Ashar",
+                    "NIM": "920020",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Yusril Mahendra",
+                    "NIM": "920032",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Ahmad Amien Rusda",
+                    "NIM": "920025",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "31 Mei 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Andi Nurfadillah",
+                    "NIM": "920042",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "06 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Rahmat Sulham",
+                    "NIM": "920014",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "26 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Esti Paramida",
+                    "NIM": "920030",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "26 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Jayadi",
+                    "NIM": "920031",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "26 Juni 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Nur Afni Aprilia",
+                    "NIM": "920003",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "08 Juli 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Hermal Al",
+                    "NIM": "920002",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "08 Juli 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Suprianto",
+                    "NIM": "920036",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "08 Juli 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Alif Rahmatullah Jufri",
+                    "NIM": "920027",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "17 Juli 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Muh Syafiq",
+                    "NIM": "920008",
+                    "Tahun Masuk": "2020",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "07 Agustus 2024",
+                    "Status": "TERBIT",
+                    "Keterangan": "PENCETAKAN DILAKUKAN DI BAAK"
+                },
+                {
+                    "Nama": "Kristina",
+                    "NIM": "2169010990",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "07 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Fadly Hidayat",
+                    "NIM": "2169010989",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "07 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS KURANG"
+                },
+                {
+                    "Nama": "Mula Wahyuni",
+                    "NIM": "2169010991",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "07 Agustus 2024",
+                    "Status": "PIN IJAZAH SEDANG DIUSULKAN",
+                    "Keterangan": "SEDANG PROSES PISN"
+                },
+                {
+                    "Nama": "Darmawati.R",
+                    "NIM": "2169010978",
+                    "Tahun Masuk": "2021",
+                    "Program Studi": "PKO",
+                    "Jenjang": "S1",
+                    "Tanggal Yudisium": "07 Agustus 2024",
+                    "Status": "DATA BERMASALAH",
+                    "Keterangan": "SKS > 24"
+                }
+            ];
+            
+            // Function to search for student data
+            function searchStudent(nim) {
+                // Show loading indicator
+                loadingElement.classList.remove('hidden');
+                resultCard.classList.add('hidden');
+                noDataMessage.classList.add('hidden');
+
+                // Simulate loading delay for better UX
+                setTimeout(() => {
+                    // Clean up NIM by removing spaces
+                    const cleanNim = nim.trim().replace(/\s+/g, '');
+                    
+                    // Find student by NIM
+                    const student = studentData.find(s => {
+                        const studentNim = String(s.NIM).trim().replace(/\s+/g, '');
+                        return studentNim === cleanNim;
+                    });
+
+                    // Hide loading indicator
+                    loadingElement.classList.add('hidden');
+
+                    if (student) {
+                        displayStudentData(student);
+                    } else {
+                        noDataMessage.classList.remove('hidden');
+                    }
+                }, 800); // 800ms delay for loading effect
+            }
+
+            // Display student data in the UI
+            function displayStudentData(student) {
+                document.getElementById('studentName').textContent = student.Nama || '-';
+                document.getElementById('studentNIM').textContent = `NIM: ${student.NIM || '-'}`;
+                document.getElementById('prodi').textContent = student['Program Studi'] || '-';
+                document.getElementById('jenjang').textContent = student.Jenjang || '-';
+                document.getElementById('tahunMasuk').textContent = student['Tahun Masuk'] || '-';
+                document.getElementById('tanggalYudisium').textContent = student['Tanggal Yudisium'] || '-';
+
+                const status = student.Status || '-';
+                document.getElementById('statusText').textContent = status;
+
+                // Set status badge color based on status
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium';
+
+                if (status.includes('TERBIT')) {
+                    statusBadge.classList.add('bg-green-100', 'text-green-800');
+                } else if (status.includes('PIN IJAZAH SEDANG DIUSULKAN')) {
+                    statusBadge.classList.add('bg-yellow-100', 'text-yellow-800');
+                } else if (status.includes('DATA BERMASALAH')) {
+                    statusBadge.classList.add('bg-red-100', 'text-red-800');
+                } else {
+                    statusBadge.classList.add('bg-gray-100', 'text-gray-800');
+                }
+
+                document.getElementById('keterangan').textContent = student.Keterangan || '-';
+
+                // Show the result card
+                resultCard.classList.remove('hidden');
+            }
+
+            // Event listeners
+            searchBtn.addEventListener('click', function() {
+                const nim = nimInput.value.trim();
+                if (nim) {
+                    searchStudent(nim);
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'NIM Kosong',
+                        text: 'Silakan masukkan NIM terlebih dahulu',
+                    });
+                }
+            });
+
+            nimInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const nim = nimInput.value.trim();
+                    if (nim) {
+                        searchStudent(nim);
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
